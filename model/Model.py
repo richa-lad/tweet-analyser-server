@@ -3,7 +3,7 @@ import tensorflow as tf
 from keras_preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from keras.layers import Input, Embedding, LSTM, Dense
-from keras.layers.merge import Concatenate
+from keras.layers import Concatenate
 from keras.models import Model
 from numpy import asarray
 from numpy import zeros
@@ -49,16 +49,16 @@ def create_model(maxlen, vocab_size, feature_headers, target_headers, embedding_
 
     embedding_layer = Embedding(vocab_size, 200, weights=[embedding_matrix], trainable=False)(input_1)
     LSTM_Layer_1 = LSTM(512, return_sequences=True)(embedding_layer)
-    LSTM_Layer_2 = LSTM(512, return_sequences=True)(LSTM_Layer_1)
-    LSTM_Layer_3 = LSTM(512, return_sequences=True)(LSTM_Layer_2)
-    LSTM_Layer_4 = LSTM(512)(LSTM_Layer_3)
+    LSTM_Layer_2 = LSTM(128, return_sequences=True)(LSTM_Layer_1)
+    LSTM_Layer_3 = LSTM(128, return_sequences=True)(LSTM_Layer_2)
+    LSTM_Layer_4 = LSTM(128)(LSTM_Layer_3)
 
 
-    dense_layer_1 = Dense(500, activation='relu')(input_2)
-    dense_layer_2 = Dense(500, activation='relu')(dense_layer_1)
+    dense_layer_1 = Dense(250, activation='relu')(input_2)
+    dense_layer_2 = Dense(125, activation='relu')(dense_layer_1)
 
     concat_layer = Concatenate()([LSTM_Layer_4, dense_layer_2])
-    dense_layer_3 = Dense(500, activation='relu')(concat_layer)
+    dense_layer_3 = Dense(125, activation='relu')(concat_layer)
     output = Dense(len(target_headers), activation='softmax')(dense_layer_3)
     model = Model(inputs=[input_1, input_2], outputs=output)
 
@@ -71,8 +71,8 @@ if __name__ == "__main__":
     df = load_data("data_collection/tweets.csv")
     df, target_headers = preprocess(df)
     feature_headers = ["text", "is_quote_status", "retweet_count", "favorite_count", "favorited", "retweeted"]
-
-    X_train, X_test, y_train, y_test = train_test_split(df[feature_headers], df[target_headers])
+    
+    X_train, X_test, y_train, y_test = train_test_split(df[feature_headers], df[target_headers], random_state=1)
 
     X1_train = []
     sentences = list(X_train["text"])
@@ -132,9 +132,9 @@ if __name__ == "__main__":
 
     history = model.fit(
         x=[X1_train, X2_train],
-        y=y_train, batch_size=32, 
+        y=y_train, batch_size=128, 
         epochs=30, verbose=1, 
-        validation_split=0.2,
+        validation_split=0.1,
         callbacks=[cp_callback]
     )
     y_pred = model.predict(x=[X1_test, X2_test])

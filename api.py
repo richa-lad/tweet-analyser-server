@@ -9,14 +9,11 @@ from keras_preprocessing.sequence import pad_sequences
 from tensorflow import keras
 from model.Model import create_model
 from numpy import asarray, zeros
+import json
 
 # define request body that contains user username
 class User(BaseModel):
     name: str
-
-# define the respose model that contains classification of user tweets
-class Classified(BaseModel):
-    results: list
 
 # start the app
 app = FastAPI()
@@ -31,7 +28,7 @@ async def welcome():
     return "Welcome to the API for 'Which Real Housewife are you?'"
 
 
-@app.post("/classify", response_model=Classified)
+@app.post("/classify")
 async def classify_user_tweets(user: User):
     # use username to pull user tweets and transform tweets into dataframe of the right format
     columns = ["text", "is_quote_status", "retweet_count", "favorite_count", "favorited", "retweeted", "username"]
@@ -39,7 +36,9 @@ async def classify_user_tweets(user: User):
     df = create_dataframe(columns, handles, api)
 
     # preprocess the data in the same way as training data
-    df, target_headers = preprocess(df)
+    df, _ = preprocess(df)
+    target_headers = ['DENISE_RICHARDS', 'GarcelleB', 'KyleRichards', 'SuttonBStracke', 'YolandaHadid', 'crystalsminkoff',
+        'doritkemsley1', 'erikajayne', 'lisarinna']
     feature_headers = columns[:-1]
     X = df[feature_headers]
 
@@ -53,10 +52,6 @@ async def classify_user_tweets(user: User):
     # loading the tokenizer created in training
     with open('checkpoints/tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
-
-    # add more vocab to old tokenizer
-    tokenizer.fit_on_texts(X1)
-
     # turn text to sequence of nums
     X1 = tokenizer.texts_to_sequences(X1)
     X1 = pad_sequences(X1, padding='post', maxlen=max_len_test)
@@ -81,15 +76,14 @@ async def classify_user_tweets(user: User):
         embedding_vector = embeddings_dictionary.get(word)
         if embedding_vector is not None:
             embedding_matrix[index] = embedding_vector
-    print("creating model from saved checkpoint")
+    print("creating model")
     # create the model from the defined architecture and load the weights
     model = create_model(max_len_test, vocab_size, feature_headers, target_headers, embedding_matrix)
+    print("loading weights")
     model.load_weights("checkpoints/training.ckpt")
     print("predicting...")
     # get predictions
     predictions = model.predict(x=[X1, X2])
-
-    # predictions are one hot vectors which need to be transformed back into housewives
-    processed_predictions = [target_headers[prediction.index(1)] for prediction in predictions]
-
-    return {"results": processed_predictions}
+    one_hot = [[1 if max(prediction)==x else 0 for x in prediction] for prediction in predictions]
+    processed_to_names = [target_headers[vec.index(1)] for vec in one_hot]
+    return {name: processed_to_names.count(name)/len(processed_to_names) for name in processed_to_names}
