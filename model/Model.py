@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import LabelBinarizer
 import re
+import pickle
 
 def load_data(path):
     return pd.read_csv(path)
@@ -117,6 +118,9 @@ if __name__ == "__main__":
         embedding_vector = embeddings_dictionary.get(word)
         if embedding_vector is not None:
             embedding_matrix[index] = embedding_vector
+    
+    with open('embeddings.pickle', 'wb') as handle1:
+      pickle.dump(embedding_matrix, handle1, protocol=pickle.HIGHEST_PROTOCOL)
 
     X2_train = X_train[feature_headers[1:]].values
     X2_test = X_test[feature_headers[1:]].values

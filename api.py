@@ -72,6 +72,10 @@ async def classify_user_tweets(user: User):
     # loading the tokenizer created in training
     with open('checkpoints/tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
+
+    with open('checkpoints/embeddings.pickle', 'rb') as handle1:
+        embedding_matrix = pickle.load(handle1)
+
     # turn text to sequence of nums
     X1 = tokenizer.texts_to_sequences(X1)
     X1 = pad_sequences(X1, padding='post', maxlen=max_len_test)
@@ -79,23 +83,8 @@ async def classify_user_tweets(user: User):
     # get X2 (input for the second model)
     X2 = X[feature_headers[1:]].values
 
-    glove_file = open('glove/glove.twitter.27B.200d.txt', encoding="utf8")
-    embeddings_dictionary = dict()
     vocab_size = len(tokenizer.word_index)+1
-    print("reading glove file")
-    for line in glove_file:
-        records = line.split()
-        word = records[0]
-        vector_dimensions = asarray(records[1:], dtype='float32')
-        embeddings_dictionary[word] = vector_dimensions
-
-    glove_file.close()
-    print("creating embedding matrix")
-    embedding_matrix = zeros((vocab_size, 200))
-    for word, index in tokenizer.word_index.items():
-        embedding_vector = embeddings_dictionary.get(word)
-        if embedding_vector is not None:
-            embedding_matrix[index] = embedding_vector
+    
     print("creating model")
     # create the model from the defined architecture and load the weights
     model = create_model(max_len_test, vocab_size, feature_headers, target_headers, embedding_matrix)
