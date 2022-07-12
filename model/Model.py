@@ -7,7 +7,6 @@ from keras.layers import Concatenate
 from keras.models import Model
 from numpy import asarray
 from numpy import zeros
-import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import LabelBinarizer
 import re
@@ -146,22 +145,3 @@ if __name__ == "__main__":
 
     print("Test Score:", score[0])
     print("Test Accuracy:", score[1])
-
-
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
-
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train','test'], loc='upper left')
-    plt.show()
-
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train','test'], loc='upper left')
-    plt.show()
