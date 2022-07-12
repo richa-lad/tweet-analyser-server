@@ -9,8 +9,11 @@ from __future__ import print_function
 
 import pandas as pd
 import twitter
-from data_collection.cred import API_KEY, API_SECRET, ACCESS_TOKEN, TOKEN_SECRET, BEARER_TOKEN
-
+import os
+API_KEY = os.environ["API_KEY"]
+API_SECRET = os.environ["API_SECRET"]
+ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
+TOKEN_SECRET = os.environ["TOKEN_SECRET"]
 def get_tweets(api=None, screen_name=None):
     timeline = api.GetUserTimeline(screen_name=screen_name, count=200)
     earliest_tweet = min(timeline, key=lambda x: x.id).id

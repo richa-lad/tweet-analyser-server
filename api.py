@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from data_collection.cred import API_KEY, API_SECRET, ACCESS_TOKEN, TOKEN_SECRET, BEARER_TOKEN
 from data_collection.RetrieveTweets import create_dataframe
 from preprocessing.utils import *
 import twitter
@@ -11,6 +10,7 @@ from tensorflow import keras
 from model.Model import create_model
 from numpy import asarray, zeros
 import json
+import os
 
 # define request body that contains user username
 class User(BaseModel):
@@ -32,6 +32,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+API_KEY = os.environ["API_KEY"]
+API_SECRET = os.environ["API_SECRET"]
+ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
+TOKEN_SECRET = os.environ["TOKEN_SECRET"]
 
 # connect to twitter
 api = twitter.Api(
