@@ -1,8 +1,3 @@
-import sys
-sys.path.append("/data_collection")
-sys.path.append("/model")
-sys.path.append("/preprocessing")
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
