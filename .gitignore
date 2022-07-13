@@ -1,3 +1,4 @@
 *.env
 /glove
 */__pycache__
+/__pycache__
