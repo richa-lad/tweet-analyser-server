@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from data_collection.RetrieveTweets import create_dataframe
-from preprocessing.utils import *
+from .data_collection.RetrieveTweets import create_dataframe
+from .preprocessing.utils import *
 import twitter
 import pickle
 from keras_preprocessing.sequence import pad_sequences
 from tensorflow import keras
-from model.Model import create_model
+from .model.Model import create_model
 from numpy import asarray, zeros
 import json
 import os
