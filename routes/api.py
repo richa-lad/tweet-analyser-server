@@ -1,24 +1,28 @@
+import re
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from data_collection.RetrieveTweets import create_dataframe
+from model.Model import create_model
+from preprocessing.utils import preprocess, preprocess_text
 from pydantic import BaseModel
 import twitter
-from utils import create_dataframe, preprocess, preprocess_text, create_model, return_prediction
+from utils import return_prediction
 import pickle
 from keras_preprocessing.sequence import pad_sequences
 from tensorflow import keras
 from numpy import asarray, zeros
 import json
 import os
-from rq import Queue
-from worker import conn
-
-# add function to background queue using redis
-q = Queue(connection=conn)
-result = q.enqueue(return_prediction, 'http://heroku.com')
 
 # define request body that contains user username
 class User(BaseModel):
     name: str
+
+class Parameters(BaseModel):
+    max_len_test: int
+    vocab_size: int
+    feature_headers: list
+    target_headers: list
 
 # start the app
 app = FastAPI()
@@ -53,8 +57,8 @@ async def welcome():
     return "Welcome to the API for 'Which Real Housewife are you?'"
 
 
-@app.post("/classify")
-async def classify_user_tweets(user: User):
+@app.post("/setup", response_model=Parameters)
+async def setup(user: User):
     # use username to pull user tweets and transform tweets into dataframe of the right format
     columns = ["text", "is_quote_status", "retweet_count", "favorite_count", "favorited", "retweeted", "username"]
     handles = [user.name]
@@ -77,24 +81,58 @@ async def classify_user_tweets(user: User):
     with open('checkpoints/tokenizer.pickle', 'rb') as handle:
         tokenizer = pickle.load(handle)
 
-    with open('checkpoints/embeddings.pickle', 'rb') as handle1:
-        embedding_matrix = pickle.load(handle1)
-
     # turn text to sequence of nums
     X1 = tokenizer.texts_to_sequences(X1)
     X1 = pad_sequences(X1, padding='post', maxlen=max_len_test)
 
     # get X2 (input for the second model)
     X2 = X[feature_headers[1:]].values
-
     vocab_size = len(tokenizer.word_index)+1
     
+    with open('checkpoints/X1.pickle', 'wb') as handle1:
+      pickle.dump(X1, handle1, protocol=pickle.HIGHEST_PROTOCOL)
+
+    with open('checkpoints/X2.pickle', 'wb') as handle2:
+      pickle.dump(X2, handle2, protocol=pickle.HIGHEST_PROTOCOL)
+
+    return {
+        "max_len_test": max_len_test,
+        "vocab_size": vocab_size,
+        "feature_headers": feature_headers,
+        "target_headers": target_headers,
+    }
+
+
+
+@app.post("/classify")
+async def classify(model_parameters: Parameters):
+
+    with open('checkpoints/embeddings.pickle', 'rb') as handle:
+        embedding_matrix = pickle.load(handle)
+    
+    with open('checkpoints/X1.pickle', 'rb') as handle1:
+        X1 = pickle.load(handle1)
+
+    with open('checkpoints/X2.pickle', 'rb') as handle2:
+        X2 = pickle.load(handle2)
+
     print("creating model")
     # create the model from the defined architecture and load the weights
-    model = create_model(max_len_test, vocab_size, feature_headers, target_headers, embedding_matrix)
+    model = create_model(
+        model_parameters.max_len_test, 
+        model_parameters.vocab_size, 
+        model_parameters.feature_headers, 
+        model_parameters.target_headers, 
+        embedding_matrix
+    )
+    
     print("loading weights")
     model.load_weights("checkpoints/training.ckpt")
-    
-    results = return_prediction(model, target_headers, X1, X2)
+    results = return_prediction(
+        model, 
+        model_parameters.target_headers, 
+        X1, 
+        X2
+    )
 
     return results

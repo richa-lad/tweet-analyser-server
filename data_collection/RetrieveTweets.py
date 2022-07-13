@@ -15,20 +15,20 @@ API_SECRET = os.environ["API_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 TOKEN_SECRET = os.environ["TOKEN_SECRET"]
 def get_tweets(api=None, screen_name=None):
-    timeline = api.GetUserTimeline(screen_name=screen_name, count=200)
+    timeline = api.GetUserTimeline(screen_name=screen_name, count=100)
     earliest_tweet = min(timeline, key=lambda x: x.id).id
 
-    while True:
-        tweets = api.GetUserTimeline(
-            screen_name=screen_name, max_id=earliest_tweet, count=200
-        )
-        new_earliest = min(tweets, key=lambda x: x.id).id
+    # while True:
+    #     tweets = api.GetUserTimeline(
+    #         screen_name=screen_name, max_id=earliest_tweet, count=10
+    #     )
+    #     new_earliest = min(tweets, key=lambda x: x.id).id
 
-        if not tweets or new_earliest == earliest_tweet:
-            break
-        else:
-            earliest_tweet = new_earliest
-            timeline += tweets
+    #     if not tweets or new_earliest == earliest_tweet:
+    #         break
+    #     else:
+    #         earliest_tweet = new_earliest
+    #         timeline += tweets
 
     return timeline
 

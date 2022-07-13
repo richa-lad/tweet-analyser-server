@@ -7,5 +7,6 @@ pydantic==1.9.1
 python_twitter==3.5
 scikit_learn==1.1.1
 tensorflow-cpu==2.9.1
+celery==5.2.7
+flower==1.1.0
 uvicorn
-rq
