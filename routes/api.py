@@ -9,7 +9,6 @@ from tensorflow import keras
 from numpy import asarray, zeros
 import json
 import os
-from boto.s3.connection import S3Connection
 
 # define request body that contains user username
 class User(BaseModel):
