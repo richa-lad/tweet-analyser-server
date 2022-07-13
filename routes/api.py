@@ -18,7 +18,19 @@ class User(BaseModel):
 app = FastAPI()
 
 # allow for CORS from front end app
-origins = ["*"]
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://rhobh-ta.herokuapp.com"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 API_KEY = os.environ["API_KEY"]
 API_SECRET = os.environ["API_SECRET"]
@@ -34,13 +46,6 @@ api = twitter.Api(
 async def welcome():
     return "Welcome to the API for 'Which Real Housewife are you?'"
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.post("/classify")
 async def classify_user_tweets(user: User):

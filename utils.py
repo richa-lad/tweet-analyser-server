@@ -5,6 +5,24 @@ from keras.layers import Input, Embedding, LSTM, Dense
 from keras.layers import Concatenate
 from keras.models import Model
 
+def get_tweets(api=None, screen_name=None):
+    timeline = api.GetUserTimeline(screen_name=screen_name, count=200)
+    earliest_tweet = min(timeline, key=lambda x: x.id).id
+
+    while True:
+        tweets = api.GetUserTimeline(
+            screen_name=screen_name, max_id=earliest_tweet, count=200
+        )
+        new_earliest = min(tweets, key=lambda x: x.id).id
+
+        if not tweets or new_earliest == earliest_tweet:
+            break
+        else:
+            earliest_tweet = new_earliest
+            timeline += tweets
+
+    return timeline
+
 def create_dataframe(columns, handles, api):
     data = []   
     for handle in handles:
