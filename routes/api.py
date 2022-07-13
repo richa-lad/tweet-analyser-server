@@ -37,7 +37,6 @@ API_KEY = os.environ["API_KEY"]
 API_SECRET = os.environ["API_SECRET"]
 ACCESS_TOKEN = os.environ["ACCESS_TOKEN"]
 TOKEN_SECRET = os.environ["TOKEN_SECRET"]
-s3 = S3Connection(os.environ["API_KEY"], os.environ["API_SECRET"], os.environ["ACCESS_TOKEN"], os.environ["TOKEN_SECRET"])
 
 # connect to twitter
 api = twitter.Api(
