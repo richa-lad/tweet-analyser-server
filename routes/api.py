@@ -53,7 +53,6 @@ async def classify_user_tweets(user: User):
     columns = ["text", "is_quote_status", "retweet_count", "favorite_count", "favorited", "retweeted", "username"]
     handles = [user.name]
     df = create_dataframe(columns, handles, api)
-
     # preprocess the data in the same way as training data
     df, _ = preprocess(df)
     target_headers = ['DENISE_RICHARDS', 'GarcelleB', 'KyleRichards', 'SuttonBStracke', 'YolandaHadid', 'crystalsminkoff',

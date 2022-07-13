@@ -39,6 +39,8 @@ def create_dataframe(columns, handles, api):
 
     df = pd.DataFrame(data=data, columns=columns)
 
+    return df
+
 def preprocess(df):
 
     df.replace(True, 1, inplace=True)
