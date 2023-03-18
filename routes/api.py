@@ -32,7 +32,8 @@ origins = [
     "http://localhost:3000/",
     "http://localhost:3001/",
     "https://rhobh-ta.herokuapp.com",
-    "https://tweet-analyzer.onrender.com/"
+    "https://tweet-analyzer.onrender.com/",
+    "https://tweet-analyzer-server.onrender.com/"
 ]
 
 app.add_middleware(
