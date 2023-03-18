@@ -28,9 +28,7 @@ class Parameters(BaseModel):
 app = FastAPI()
 
 # allow for CORS from front end app
-origins = [
-*
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
